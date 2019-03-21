@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`read returns events for aggregate id 1`] = `
+Array [
+  Object {
+    "aggregateId": "account:1234",
+    "aggregateVersion": 0,
+    "correlationId": "a-uuid-1",
+    "data": Object {},
+    "eventType": "account:created",
+  },
+  Object {
+    "aggregateId": "account:1234",
+    "aggregateVersion": 1,
+    "correlationId": "a-uuid-2",
+    "data": Object {
+      "amount": 100,
+    },
+    "eventType": "account:deposit",
+  },
+]
+`;
