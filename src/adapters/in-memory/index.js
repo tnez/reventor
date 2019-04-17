@@ -1,4 +1,3 @@
-// TODO: jsdocs
 module.exports = class InMemory {
   constructor(initialEvents = []) {
     this.events = initialEvents
@@ -9,6 +8,6 @@ module.exports = class InMemory {
   }
 
   async write(events) {
-    this.events.push(events)
+    this.events.push(...events)
   }
 }

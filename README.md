@@ -31,7 +31,7 @@ function reducer (previousState = {}, event) {
   case 'acct:withdrawal':
     return {
        ...previousState,
-       balance: previousState.balance + data.amount
+       balance: previousState.balance - data.amount
     }
   }
   default:

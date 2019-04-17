@@ -1,6 +1,6 @@
-const { InMemory } = require('..')
+const InMemory = require('..')
 
-const factory = require('../__factories__')
+const factory = require('../../__factories__')
 
 const events = [
   factory.event({
@@ -38,7 +38,17 @@ describe('read', () => {
 describe('write', () => {
   const store = new InMemory()
 
-  it('resolves to undefined', async () => {
-    await expect(store.write(events)).resolves.toBeUndefined()
+  let result
+  beforeAll(async done => {
+    result = await store.write(events)
+    done()
+  })
+
+  it('resolves to undefined', () => {
+    expect(result).toBeUndefined()
+  })
+
+  it('updates events acordingly', () => {
+    expect(store.events).toStrictEqual(events)
   })
 })

@@ -1,4 +1,5 @@
-const { createStore } = require('../index.js')
+const { createStore } = require('../index')
+const stubbed = require('../__stubs__')
 
 describe('dispatch', () => {
   let es, adapter
@@ -41,40 +42,53 @@ describe('dispatch', () => {
 })
 
 describe('getState', () => {
-  const mockedEvents = [
-    {
-      aggregateId: 'fish:1234',
-      aggregateVersion: 0,
-      data: {
-        color: 'red',
-        id: 'fish:1234',
-      },
-      eventType: 'fish:created',
-    },
-    {
-      aggregateId: 'fish:1234',
-      aggregateVersion: 1,
-      data: { color: 'blue' },
-      eventType: 'fish:updated',
-    },
-    {
-      aggregateId: 'fish:1234',
-      aggregateVersion: 2,
-      eventType: 'fish:destroyed',
-    },
-  ]
-
-  let es, adapter, reducer
-  beforeEach(() => {
-    adapter = { read: jest.fn(() => mockedEvents) }
-    reducer = jest.fn()
-    es = createStore(adapter, reducer)
+  let es
+  const mockRead = jest.fn(id =>
+    stubbed.events.filter(evt => evt.aggregateId === id),
+  )
+  const mockReducer = jest.fn((prevState, evt) => {
+    const { aggregateId, data, eventType } = evt
+    switch (eventType) {
+      case 'acct:created':
+        return { aggregateId, amount: 0, ...data }
+      case 'acct:deposit':
+        return { ...prevState, amount: prevState.amount + data.amount }
+      case 'acct:withdrawal':
+        return { ...prevState, amount: prevState.amount - data.amount }
+      default:
+        return prevState
+    }
   })
 
-  it('calls the reducer the propper arguments', async () => {
-    await es.getState('fish:1234')
+  beforeEach(() => {
+    es = createStore({ read: mockRead }, mockReducer)
+  })
 
-    expect(adapter.read).toHaveBeenCalledWith('fish:1234')
-    expect(reducer).toHaveBeenCalledWith({}, mockedEvents)
+  it('calls the reducer with the correct events', async done => {
+    const result = await es.getState('acct:1')
+
+    expect(mockRead).toBeCalledWith('acct:1')
+
+    const aggregateEvents = stubbed.events.filter(
+      evt => evt.aggregateId === 'acct:1',
+    )
+    aggregateEvents.forEach((evt, idx) => {
+      expect(mockReducer).toHaveBeenNthCalledWith(
+        idx + 1,
+        expect.any(Object),
+        evt,
+        idx,
+        aggregateEvents,
+      )
+    })
+
+    expect(result).toStrictEqual({
+      aggregateId: 'acct:1',
+      amount: 25,
+      foo: 'baz',
+      name: 'an account',
+    })
+
+    done()
   })
 })

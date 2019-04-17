@@ -17,8 +17,8 @@ function createStore(adapter, reducer) {
       return adapter.write(Array.isArray(events) ? events : [events])
     },
     getState: async aggregateId => {
-      const events = adapter.read(aggregateId)
-      return reducer({}, events)
+      const events = await adapter.read(aggregateId)
+      return events.reduce(reducer, {})
     },
   }
 }
